@@ -1,11 +1,13 @@
 package main
 
 import (
+	"log"
+	"os"
+
 	"github.com/fuellab/simple-sms/aligo"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/cors"
 	"github.com/spf13/viper"
-	"log"
 )
 
 func readENV(key string) string {
@@ -23,12 +25,20 @@ func readENV(key string) string {
 	return value
 }
 
-var aligoKey, aligoID, aligoPhone string
+var aligoKey, aligoID, aligoPhone, port string
 
 func init() {
 	aligoKey = readENV("ALIGO_KEY")
 	aligoID = readENV("ALIGO_ID")
 	aligoPhone = readENV("ALIGO_PHONE")
+
+	val, ok := os.LookupEnv("PORT")
+	if !ok {
+		port = "9001"
+	} else {
+		port = val
+	}
+
 }
 
 func main() {
@@ -92,8 +102,9 @@ func main() {
 		return fiber.ErrNotFound
 	})
 
-	err := app.Listen(":9001")
+	err := app.Listen(":" + port)
 	if err != nil {
+		log.Fatalf("Error starting server: %s", err)
 		return
 	}
 }
